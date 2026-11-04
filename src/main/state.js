@@ -4,6 +4,8 @@ const EVENT_STATES = Object.freeze({
   build_ok: 'happy',
   commit: 'happy',
   test_fail: 'panic',
+  sleep: 'sleep',
+  wake: 'idle',
 });
 
 function createStateMachine({ duration = 4000, onChange = () => {} } = {}) {

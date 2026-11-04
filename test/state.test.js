@@ -49,10 +49,12 @@ test('test_fail shows panic, and a later event restarts the four second reaction
   machine.dispose();
 });
 
-test('sleep can be set as a persistent state; unknown states and events are rejected', () => {
+test('sleep and wake events select their states; unknown states and events are rejected', () => {
   const machine = createStateMachine();
-  assert.equal(machine.setState('sleep'), true);
+  assert.equal(machine.dispatch('sleep'), true);
   assert.equal(machine.getState(), 'sleep');
+  assert.equal(machine.dispatch('wake'), true);
+  assert.equal(machine.getState(), 'idle');
   assert.equal(machine.setState('unknown'), false);
   assert.equal(machine.dispatch('unknown'), false);
   machine.dispose();

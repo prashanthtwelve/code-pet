@@ -19,12 +19,68 @@
       }
 
       #pet {
+        position: relative;
         width: 112px;
         height: 112px;
-        border-radius: 50%;
-        background: #8b5cf6;
-        box-shadow: inset -10px -12px 0 rgb(0 0 0 / 12%), 0 8px 20px rgb(0 0 0 / 20%);
         cursor: grab;
+        animation: float 3s ease-in-out infinite;
+      }
+
+      #pet-sprite {
+        display: block;
+        width: 100%;
+        height: 100%;
+        overflow: visible;
+        filter: drop-shadow(0 5px 5px rgb(52 44 64 / 16%));
+      }
+
+      #pet.state-happy {
+        animation: bounce 500ms ease-in-out infinite alternate;
+      }
+
+      #pet.state-panic {
+        animation: shake 160ms linear infinite;
+      }
+
+      #pet.state-sleep {
+        animation: breathe 2.8s ease-in-out infinite;
+      }
+
+      #pet.state-sleep::after {
+        content: 'z';
+        position: absolute;
+        top: 0;
+        right: 6px;
+        color: #8291b7;
+        font: 700 17px/1 system-ui, sans-serif;
+        animation: drift-z 2.2s ease-out infinite;
+      }
+
+      @keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-5px); }
+      }
+
+      @keyframes bounce {
+        from { transform: translateY(1px) scale(.98); }
+        to { transform: translateY(-8px) scale(1.03); }
+      }
+
+      @keyframes shake {
+        0%, 100% { transform: translate(0, 0) rotate(0); }
+        25% { transform: translate(-2px, 1px) rotate(-2deg); }
+        75% { transform: translate(2px, -1px) rotate(2deg); }
+      }
+
+      @keyframes breathe {
+        0%, 100% { transform: scale(1) rotate(-2deg); }
+        50% { transform: scale(1.04, .97) rotate(-2deg); }
+      }
+
+      @keyframes drift-z {
+        0% { opacity: 0; transform: translate(0, 7px) scale(.8); }
+        35% { opacity: 1; }
+        100% { opacity: 0; transform: translate(7px, -18px) scale(1.2); }
       }
 
       #state {
@@ -40,17 +96,31 @@
     </style>
   </head>
   <body>
-    <div id="pet" aria-label="Placeholder pet"></div>
+    <div id="pet" class="state-idle" aria-label="Code pet">
+      <img id="pet-sprite" alt="Idle ghost holding a warm mug">
+    </div>
     <div id="state">idle</div>
     <script>
       const pet = document.getElementById('pet');
+      const sprite = document.getElementById('pet-sprite');
       const stateLabel = document.getElementById('state');
+
+      function showState(state) {
+        pet.className = `state-${state}`;
+        stateLabel.textContent = state;
+        sprite.alt = `${state} ghost`;
+        const basePath = `../../assets/pets/ghost/${state}`;
+        sprite.onerror = () => {
+          sprite.onerror = null;
+          sprite.src = `${basePath}.svg`;
+        };
+        sprite.src = `${basePath}.png`;
+      }
+
       pet.addEventListener('mouseenter', () => window.petWindow?.mouseOverPet());
       pet.addEventListener('mouseleave', () => window.petWindow?.mouseOutPet());
-      window.petWindow?.onStateChanged((state) => {
-        stateLabel.textContent = state;
-        pet.dataset.state = state;
-      });
+      showState('idle');
+      window.petWindow?.onStateChanged(showState);
     </script>
   </body>
 </html>
