@@ -24,6 +24,17 @@ test('successful events show happy, then return to idle after four seconds', (t)
   machine.dispose();
 });
 
+test('reaction duration can be configured', (t) => {
+  t.mock.timers.enable({ apis: ['setTimeout'] });
+  const machine = createStateMachine({ duration: 800 });
+  machine.dispatch('test_pass');
+  t.mock.timers.tick(799);
+  assert.equal(machine.getState(), 'happy');
+  t.mock.timers.tick(1);
+  assert.equal(machine.getState(), 'idle');
+  machine.dispose();
+});
+
 test('build_ok and commit map to happy', (t) => {
   t.mock.timers.enable({ apis: ['setTimeout'] });
   const machine = createStateMachine();

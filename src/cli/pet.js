@@ -4,6 +4,8 @@ const { spawn } = require('node:child_process');
 const fs = require('node:fs');
 const path = require('node:path');
 const { execFileSync } = require('node:child_process');
+const { loadConfig } = require('../main/config');
+const { getUserDataDirectory } = require('../main/user-data-path');
 
 const HOOK_START = '# >>> code-pet post-commit >>>';
 const HOOK_END = '# <<< code-pet post-commit <<<';
@@ -12,9 +14,9 @@ async function sendEvent(type) {
   const configuredPort = Number(process.env.CODE_PET_EVENT_PORT);
   const port = Number.isInteger(configuredPort) && configuredPort >= 1 && configuredPort <= 65535
     ? configuredPort
-    : 4747;
+    : loadConfig(path.join(getUserDataDirectory(), 'config.json')).port;
   try {
-    await fetch(`http://127.0.0.1:${port}/event`, {
+    return await fetch(`http://127.0.0.1:${port}/event`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ type }),
@@ -22,6 +24,7 @@ async function sendEvent(type) {
     });
   } catch {
     // The pet is optional: event delivery must not affect CLI commands.
+    return undefined;
   }
 }
 

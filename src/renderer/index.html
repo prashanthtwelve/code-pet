@@ -50,6 +50,14 @@
         animation: groggy-wobble 240ms ease-in-out infinite alternate;
       }
 
+      #pet.micro-hop {
+        animation: tiny-hop 380ms ease-in-out;
+      }
+
+      #pet.micro-blink #pet-sprite {
+        animation: blink 180ms ease-in-out;
+      }
+
       #pet.state-sleep::after {
         content: 'z';
         position: absolute;
@@ -92,6 +100,16 @@
         to { transform: rotate(7deg) translateY(-2px); }
       }
 
+      @keyframes tiny-hop {
+        0%, 100% { transform: translateY(0); }
+        45% { transform: translateY(-9px); }
+      }
+
+      @keyframes blink {
+        0%, 100% { transform: scaleY(1); }
+        45% { transform: scaleY(.08); }
+      }
+
       #state {
         position: absolute;
         left: 0;
@@ -109,28 +127,72 @@
       <img id="pet-sprite" alt="Idle ghost holding a warm mug">
     </div>
     <div id="state">idle</div>
+    <script src="micro-animation.js"></script>
     <script>
       const pet = document.getElementById('pet');
       const sprite = document.getElementById('pet-sprite');
       const stateLabel = document.getElementById('state');
+      let currentState = 'idle';
+      let petName = 'Ghost';
+      let spriteBaseUrl = new URL('../../assets/pets/ghost/', window.location.href).href;
+      let dragging = false;
 
       function showState(state) {
+        currentState = state;
         pet.className = `state-${state}`;
-        stateLabel.textContent = state;
-        sprite.alt = `${state} ghost`;
+        stateLabel.textContent = `${petName} · ${state}`;
+        sprite.alt = `${state} ${petName}`;
         const spriteState = state === 'waking' ? 'sleep' : state;
-        const basePath = `../../assets/pets/ghost/${spriteState}`;
+        const pngUrl = new URL(`${spriteState}.png`, spriteBaseUrl).href;
+        const svgUrl = new URL(`${spriteState}.svg`, spriteBaseUrl).href;
         sprite.onerror = () => {
+          if (sprite.src !== pngUrl) return;
           sprite.onerror = null;
-          sprite.src = `${basePath}.svg`;
+          sprite.src = svgUrl;
         };
-        sprite.src = `${basePath}.png`;
+        sprite.src = pngUrl;
+      }
+
+      function applySettings(settings) {
+        if (settings.petName) petName = settings.petName;
+        if (settings.spriteBaseUrl) spriteBaseUrl = settings.spriteBaseUrl;
+        showState(settings.state || currentState);
       }
 
       pet.addEventListener('mouseenter', () => window.petWindow?.mouseOverPet());
-      pet.addEventListener('mouseleave', () => window.petWindow?.mouseOutPet());
+      pet.addEventListener('mouseleave', () => {
+        if (!dragging) window.petWindow?.mouseOutPet();
+      });
+      pet.addEventListener('pointerdown', (event) => {
+        if (event.button !== 0) return;
+        dragging = true;
+        pet.setPointerCapture(event.pointerId);
+        window.petWindow?.startDrag({ x: event.screenX, y: event.screenY });
+      });
+      pet.addEventListener('pointermove', (event) => {
+        if (dragging) window.petWindow?.moveDrag({ x: event.screenX, y: event.screenY });
+      });
+      function stopDragging(event) {
+        if (!dragging) return;
+        dragging = false;
+        window.petWindow?.endDrag(event ? { x: event.screenX, y: event.screenY } : undefined);
+      }
+      pet.addEventListener('pointerup', stopDragging);
+      pet.addEventListener('pointercancel', stopDragging);
       showState('idle');
       window.petWindow?.onStateChanged(showState);
+      window.petWindow?.onSettingsChanged(applySettings);
+      window.petWindow?.getSettings().then(applySettings).catch(() => {});
+
+      const microAnimations = window.petMicroAnimation.createMicroAnimationScheduler({
+        isEnabled: () => currentState === 'idle',
+        onAnimation: (animation) => {
+          pet.classList.remove('micro-blink', 'micro-hop');
+          pet.classList.add(`micro-${animation}`);
+          setTimeout(() => pet.classList.remove(`micro-${animation}`), 500);
+        },
+      });
+      microAnimations.start();
     </script>
   </body>
 </html>

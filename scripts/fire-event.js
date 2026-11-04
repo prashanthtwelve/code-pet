@@ -1,3 +1,4 @@
+const { sendEvent } = require('../src/cli/pet');
 const type = process.argv[2];
 
 if (!type) {
@@ -5,12 +6,9 @@ if (!type) {
   process.exit(1);
 }
 
-fetch('http://127.0.0.1:4747/event', {
-  method: 'POST',
-  headers: { 'content-type': 'application/json' },
-  body: JSON.stringify({ type }),
-})
+sendEvent(type)
   .then(async (response) => {
+    if (!response) throw new Error('Could not reach Code Pet');
     const body = await response.text();
     if (!response.ok) {
       console.error(`Event rejected (${response.status}): ${body}`);
