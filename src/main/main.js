@@ -1,7 +1,8 @@
-const { app, BrowserWindow, ipcMain, screen } = require('electron');
+const { app, BrowserWindow, ipcMain, powerMonitor, screen } = require('electron');
 const path = require('node:path');
 const { createStateMachine } = require('./state');
 const { createEventServer } = require('./event-server');
+const { createSleepWatcher } = require('./sleep-watcher');
 
 let petWindow;
 const stateMachine = createStateMachine({
@@ -43,14 +44,28 @@ function createWindow() {
 }
 
 let eventServer;
+let sleepWatcher;
 app.whenReady().then(() => {
   createWindow();
   eventServer = createEventServer(stateMachine);
   eventServer.on('error', (error) => console.error('Event server error:', error));
+
+  const configuredThreshold = Number(process.env.CODE_PET_IDLE_THRESHOLD_SECONDS);
+  const thresholdSeconds = Number.isFinite(configuredThreshold) && configuredThreshold > 0
+    ? configuredThreshold
+    : 300;
+  sleepWatcher = createSleepWatcher({
+    getIdleTime: () => powerMonitor.getSystemIdleTime(),
+    thresholdSeconds,
+    onSleep: () => stateMachine.setState('sleep'),
+    onWake: () => stateMachine.setState('waking', { temporary: true, duration: 2000 }),
+  });
+  sleepWatcher.start();
 });
 
 app.on('before-quit', () => {
   stateMachine.dispose();
+  if (sleepWatcher) sleepWatcher.stop();
   if (eventServer) eventServer.close();
 });
 

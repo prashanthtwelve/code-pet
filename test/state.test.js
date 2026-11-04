@@ -4,7 +4,7 @@ const { createStateMachine, STATES } = require('../src/main/state');
 
 test('declares all supported states and starts idle', () => {
   const machine = createStateMachine();
-  assert.deepEqual(STATES, ['idle', 'happy', 'panic', 'sleep']);
+  assert.deepEqual(STATES, ['idle', 'happy', 'panic', 'sleep', 'waking']);
   assert.equal(machine.getState(), 'idle');
   machine.dispose();
 });

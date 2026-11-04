@@ -7,7 +7,7 @@
   "scripts": {
     "start": "electron .",
     "test": "node --test",
-    "build": "node --check src/main/main.js && node --check src/main/state.js && node --check src/main/event-server.js && node --check src/main/preload.js && node --check scripts/fire-event.js",
+    "build": "node --check src/main/main.js && node --check src/main/state.js && node --check src/main/sleep-watcher.js && node --check src/main/event-server.js && node --check src/main/preload.js && node --check scripts/fire-event.js",
     "fire-event": "node scripts/fire-event.js"
   },
   "devDependencies": {

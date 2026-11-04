@@ -46,6 +46,10 @@
         animation: breathe 2.8s ease-in-out infinite;
       }
 
+      #pet.state-waking {
+        animation: groggy-wobble 240ms ease-in-out infinite alternate;
+      }
+
       #pet.state-sleep::after {
         content: 'z';
         position: absolute;
@@ -83,6 +87,11 @@
         100% { opacity: 0; transform: translate(7px, -18px) scale(1.2); }
       }
 
+      @keyframes groggy-wobble {
+        from { transform: rotate(-7deg) translateY(1px); }
+        to { transform: rotate(7deg) translateY(-2px); }
+      }
+
       #state {
         position: absolute;
         left: 0;
@@ -109,7 +118,8 @@
         pet.className = `state-${state}`;
         stateLabel.textContent = state;
         sprite.alt = `${state} ghost`;
-        const basePath = `../../assets/pets/ghost/${state}`;
+        const spriteState = state === 'waking' ? 'sleep' : state;
+        const basePath = `../../assets/pets/ghost/${spriteState}`;
         sprite.onerror = () => {
           sprite.onerror = null;
           sprite.src = `${basePath}.svg`;

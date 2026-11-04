@@ -1,4 +1,4 @@
-const STATES = Object.freeze(['idle', 'happy', 'panic', 'sleep']);
+const STATES = Object.freeze(['idle', 'happy', 'panic', 'sleep', 'waking']);
 const EVENT_STATES = Object.freeze({
   test_pass: 'happy',
   build_ok: 'happy',
@@ -17,7 +17,10 @@ function createStateMachine({ duration = 4000, onChange = () => {} } = {}) {
     timer = undefined;
   }
 
-  function setState(nextState, { temporary = nextState === 'happy' || nextState === 'panic' } = {}) {
+  function setState(nextState, {
+    temporary = nextState === 'happy' || nextState === 'panic',
+    duration: stateDuration = duration,
+  } = {}) {
     if (!STATES.includes(nextState)) return false;
 
     clearReactionTimer();
@@ -33,7 +36,7 @@ function createStateMachine({ duration = 4000, onChange = () => {} } = {}) {
           state = 'idle';
           onChange(state);
         }
-      }, duration);
+      }, stateDuration);
     }
     return true;
   }
