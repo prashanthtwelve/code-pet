@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Code Pet</title>
+    <style>
+      html, body {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        overflow: hidden;
+        background: transparent;
+      }
+
+      body {
+        display: grid;
+        place-items: center;
+      }
+
+      #pet {
+        width: 112px;
+        height: 112px;
+        border-radius: 50%;
+        background: #8b5cf6;
+        box-shadow: inset -10px -12px 0 rgb(0 0 0 / 12%), 0 8px 20px rgb(0 0 0 / 20%);
+        cursor: grab;
+      }
+
+      #state {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 8px;
+        color: #312e38;
+        font: 12px/1.2 system-ui, sans-serif;
+        text-align: center;
+        text-shadow: 0 1px 2px white;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="pet" aria-label="Placeholder pet"></div>
+    <div id="state">idle</div>
+    <script>
+      const pet = document.getElementById('pet');
+      const stateLabel = document.getElementById('state');
+      pet.addEventListener('mouseenter', () => window.petWindow?.mouseOverPet());
+      pet.addEventListener('mouseleave', () => window.petWindow?.mouseOutPet());
+      window.petWindow?.onStateChanged((state) => {
+        stateLabel.textContent = state;
+        pet.dataset.state = state;
+      });
+    </script>
+  </body>
+</html>
