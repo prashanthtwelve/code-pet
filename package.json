@@ -1,0 +1,52 @@
+{
+  "name": "code-pet",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A desktop coding pet",
+  "main": "src/main/main.js",
+  "bin": {
+    "pet": "src/cli/pet.js"
+  },
+  "scripts": {
+    "start": "electron .",
+    "test": "node --test",
+    "build": "node --check src/main/main.js && node --check src/main/state.js && node --check src/main/config.js && node --check src/main/sleep-watcher.js && node --check src/main/event-server.js && node --check src/main/pet-catalog.js && node --check src/main/window-position.js && node --check src/main/user-data-path.js && node --check src/main/tray-icon.js && node --check src/main/preload.js && node --check src/renderer/micro-animation.js && node --check src/cli/pet.js && node --check scripts/fire-event.js && node --check scripts/demo.js",
+    "build:win": "electron-builder --win nsis",
+    "build:mac": "electron-builder --mac dmg",
+    "build:linux": "electron-builder --linux AppImage",
+    "fire-event": "node scripts/fire-event.js",
+    "demo": "node scripts/demo.js"
+  },
+  "devDependencies": {
+    "electron": "^39.2.7",
+    "electron-builder": "^26.18.0"
+  },
+  "build": {
+    "appId": "com.codepet.desktop",
+    "productName": "Code Pet",
+    "artifactName": "${productName}-${version}-${os}-${arch}.${ext}",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "src/**/*",
+      "assets/pets/**/*"
+    ],
+    "win": {
+      "target": [{ "target": "nsis", "arch": ["x64"] }],
+      "icon": "build/icon.svg"
+    },
+    "mac": {
+      "target": ["dmg"],
+      "icon": "build/icon.svg"
+    },
+    "linux": {
+      "target": ["AppImage"],
+      "icon": "build/icon.svg"
+    }
+  },
+  "allowScripts": {
+    "electron@39.8.10": true
+  }
+}
